@@ -1,0 +1,1 @@
+docker run -t -d -p producer-service

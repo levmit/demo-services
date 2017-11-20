@@ -1,0 +1,1 @@
+docker run -t -d -p concumer-service
