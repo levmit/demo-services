@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"maven.projects.pinnedPomPaths": [
+			"/home/devenv/Projects/demo-services/consumer/pom.xml"
+		]
+	}
+}

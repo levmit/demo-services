@@ -4,9 +4,13 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.AbstractApplicationContext;
 
+import com.deliveredtechnologies.rulebook.FactMap;
+import com.deliveredtechnologies.rulebook.NameValueReferableMap;
+import com.deliveredtechnologies.rulebook.model.RuleBook;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microservice.test.test_app.context.SpringConfiguration;
@@ -32,6 +36,8 @@ public class ConsumerVerticle extends AbstractVerticle {
 	private AbstractApplicationContext appContext;
 	private ProductService service;
 
+	private RuleBook<?> ruleBook;
+
 	public static void main(String[] args) {
 		Launcher.executeCommand("run", ConsumerVerticle.class.getName());
 	}
@@ -55,6 +61,14 @@ public class ConsumerVerticle extends AbstractVerticle {
 			config.put(DEFAULT_BUS, "message_bus");
 			// ***************************************************************
 
+			NameValueReferableMap<String> facts = new FactMap<>();
+			facts.setValue("hello", "Hello ");
+		    facts.setValue("world", "World");
+		    ruleBook.run(facts);
+		    System.out.println("Start evaluating rules");
+		    ruleBook.getResult().ifPresent(System.out::println);
+		    System.out.println("End evaluating rules");
+		    
 			String address = config.getString(DEFAULT_BUS);
 			log.info("Listening to address: " + address);
 			vertx.eventBus().<String>consumer(address).handler(doGetProducts());
@@ -65,6 +79,7 @@ public class ConsumerVerticle extends AbstractVerticle {
 
 	private Handler<Message<String>> doGetProducts() {
 		log.info("Start doGetProducts");
+
 		return msg -> vertx.<String>executeBlocking(future -> {
 			try {
 				List<Product> allProducts = service.getAllProducts();
@@ -96,6 +111,7 @@ public class ConsumerVerticle extends AbstractVerticle {
 	private Future<Void> initializeServices() {
 		Future<Void> future = Future.future();
 		service = appContext.getBean(ProductService.class);
+		ruleBook = appContext.getBean(RuleBook.class);
 		if (service != null) {
 			future.complete();
 		} else {

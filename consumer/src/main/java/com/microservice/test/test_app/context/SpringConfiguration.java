@@ -21,8 +21,11 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import com.deliveredtechnologies.rulebook.model.RuleBook;
+import com.deliveredtechnologies.rulebook.model.runner.RuleBookRunner;
+
 @Configuration
-@ComponentScan(basePackages = {"com.microservice.test.test_app.*"})
+@ComponentScan(basePackages = { "com.microservice.test.test_app.*" })
 @EnableJpaRepositories(basePackages = { "com.microservice.test.test_app.repository" })
 @PropertySource(value = { "classpath:application.properties" })
 public class SpringConfiguration {
@@ -75,4 +78,10 @@ public class SpringConfiguration {
 		return populator;
 	}
 
+	@Bean
+	@Autowired
+	public RuleBook<?> ruleBook() {
+		RuleBook<?> ruleBook = new RuleBookRunner("com.microservice.test.test_app.rules");
+		return ruleBook;
+	}
 }
