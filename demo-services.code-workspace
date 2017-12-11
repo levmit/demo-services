@@ -6,7 +6,9 @@
 	],
 	"settings": {
 		"maven.projects.pinnedPomPaths": [
+			"/home/devenv/Projects/demo-services/producer/pom.xml",
 			"/home/devenv/Projects/demo-services/consumer/pom.xml"
-		]
+		],
+		"java.configuration.updateBuildConfiguration": "automatic"
 	}
 }
