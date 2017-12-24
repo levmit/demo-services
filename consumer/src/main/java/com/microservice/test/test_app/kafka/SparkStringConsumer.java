@@ -28,7 +28,7 @@ public class SparkStringConsumer {
 	public static void main(String[] args) {
 		SparkConf conf = new SparkConf().setAppName("kafka-sandbox").setMaster("local[*]");
 		JavaSparkContext sc = new JavaSparkContext(conf);
-		JavaStreamingContext ssc = new JavaStreamingContext(sc, new Duration(2000));
+		JavaStreamingContext ssc = new JavaStreamingContext(sc, new Duration(1000));
 
 		Set<String> topics = Collections.singleton("mytopic");
 		Map<String, String> kafkaParams = new HashMap<>();
