@@ -1,5 +1,7 @@
 package com.microservice.test.test_app.kafka;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Properties;
 
 import org.apache.avro.Schema;
@@ -12,18 +14,31 @@ import com.twitter.bijection.Injection;
 import com.twitter.bijection.avro.GenericAvroCodecs;
 
 public class SimpleStringProducer {
-	public static final String USER_SCHEMA = "{" + "\"type\":\"record\"," + "\"name\":\"myrecord\"," + "\"fields\":["
-			+ "  { \"name\":\"str1\", \"type\":\"string\" }," + "  { \"name\":\"str2\", \"type\":\"string\" },"
-			+ "  { \"name\":\"int1\", \"type\":\"int\" }" + "]}";
 
-	public static void main(String[] args) throws InterruptedException {
+	public static void main(String[] args) {
+
+		SimpleStringProducer producer = new SimpleStringProducer();
+		producer.send();
+
+	}
+
+	private void send() {
+		ClassLoader classLoader = new SimpleStringProducer().getClass().getClassLoader();
+		File schemaFile = new File(classLoader.getResource("test.avsc").getFile());
+
 		Properties props = new Properties();
 		props.put("bootstrap.servers", "localhost:9092");
 		props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 		props.put("value.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer");
 
 		Schema.Parser parser = new Schema.Parser();
-		Schema schema = parser.parse(USER_SCHEMA);
+		Schema schema = null;
+		try {
+			schema = parser.parse(schemaFile);
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		Injection<GenericRecord, byte[]> recordInjection = GenericAvroCodecs.toBinary(schema);
 
 		KafkaProducer<String, byte[]> producer = new KafkaProducer<>(props);
@@ -39,7 +54,12 @@ public class SimpleStringProducer {
 			ProducerRecord<String, byte[]> record = new ProducerRecord<>("mytopic", bytes);
 			producer.send(record);
 
-			Thread.sleep(250);
+			try {
+				Thread.sleep(250);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 
 		}
 

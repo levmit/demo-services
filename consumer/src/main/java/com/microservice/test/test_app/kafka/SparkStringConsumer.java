@@ -1,5 +1,7 @@
 package com.microservice.test.test_app.kafka;
 
+import java.io.File;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,11 +23,21 @@ import kafka.serializer.DefaultDecoder;
 import kafka.serializer.StringDecoder;
 
 public class SparkStringConsumer {
-	public static final String USER_SCHEMA = "{" + "\"type\":\"record\"," + "\"name\":\"myrecord\"," + "\"fields\":["
-			+ "  { \"name\":\"str1\", \"type\":\"string\" }," + "  { \"name\":\"str2\", \"type\":\"string\" },"
-			+ "  { \"name\":\"int1\", \"type\":\"int\" }" + "]}";
 
 	public static void main(String[] args) {
+
+		SparkStringConsumer consumer = new SparkStringConsumer();
+		consumer.processStream();
+
+	}
+
+	private void processStream() {
+		ClassLoader classLoader = new SparkStringConsumer().getClass().getClassLoader();
+        File schemaFile = new File(classLoader.getResource("test.avsc").getFile());
+         
+        //File is found
+        System.out.println("File Found : " + schemaFile.exists());
+
 		SparkConf conf = new SparkConf().setAppName("kafka-sandbox").setMaster("local[*]");
 		JavaSparkContext sc = new JavaSparkContext(conf);
 		JavaStreamingContext ssc = new JavaStreamingContext(sc, new Duration(1000));
@@ -40,7 +52,7 @@ public class SparkStringConsumer {
 		directKafkaStream.foreachRDD(rdd -> {
 			rdd.foreach(avroRecord -> {
 				Schema.Parser parser = new Schema.Parser();
-				Schema schema = parser.parse(USER_SCHEMA);
+				Schema schema = parser.parse(schemaFile);
 				Injection<GenericRecord, byte[]> recordInjection = GenericAvroCodecs.toBinary(schema);
 				GenericRecord record = recordInjection.invert(avroRecord._2).get();
 
